@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="assets/icon-128.png" alt="CodeClimax Logo" width="120">
+</div>
+
 # CodeClimax 🏔️
 
 **Level up your LeetCode experience with custom celebration media!**
@@ -6,7 +10,9 @@ CodeClimax is a minimalist Chrome extension that celebrates your problem-solving
 
 ## 📸 Extension Preview
 
-![CodeClimax Extension Interface](assets/screenshots/popup-demo.png)
+<div align="center">
+  <img src="assets/screenshots/popup-demo.png" alt="CodeClimax Extension Interface" width="600">
+</div>
 
 ---
 
