@@ -1,0 +1,343 @@
+/* CodeClimax Celebration Overlay Styles */
+
+/* Main overlay container */
+.codecclimax-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+  pointer-events: all;
+}
+
+/* Backdrop with blur effect */
+.overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  pointer-events: all;
+}
+
+/* Media container */
+.media-container {
+  position: relative;
+  z-index: 1;
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+  background: #000;
+}
+
+/* Media elements */
+.media-container img,
+.media-container video {
+  display: block;
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 16px;
+}
+
+.media-container iframe {
+  width: 800px;
+  height: 450px;
+  max-width: 90vw;
+  max-height: 90vh;
+  border: none;
+  border-radius: 16px;
+}
+
+/* Close button */
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events: auto;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.close-btn:active {
+  transform: scale(0.95);
+}
+
+.close-btn:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-20px) scale(1.05);
+  }
+  60% {
+    transform: translateY(-10px) scale(1.02);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+  }
+  to {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes confetti {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Overlay variations */
+.codecclimax-overlay.fade-in {
+  animation: fadeIn 0.3s ease;
+}
+
+.codecclimax-overlay.slide-in {
+  animation: slideIn 0.5s ease;
+}
+
+.codecclimax-overlay.bounce {
+  animation: bounce 1s ease;
+}
+
+.codecclimax-overlay.fade-out {
+  animation: fadeOut 0.5s ease forwards;
+}
+
+/* Confetti effect */
+.confetti-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+  animation: confetti 3s linear;
+  opacity: 0;
+}
+
+.confetti-piece:nth-child(odd) {
+  width: 8px;
+  height: 8px;
+  animation-duration: 2.5s;
+  animation-delay: 0.2s;
+}
+
+.confetti-piece:nth-child(even) {
+  width: 12px;
+  height: 12px;
+  animation-duration: 3.5s;
+  animation-delay: 0.1s;
+}
+
+/* Celebration text styles */
+.celebration-text {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+  pointer-events: none;
+  animation: slideIn 0.8s ease, pulse 2s infinite;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .media-container {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .media-container iframe {
+    width: 90vw;
+    height: calc(90vw * 0.5625); /* 16:9 aspect ratio */
+  }
+
+  .close-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    top: 12px;
+    right: 12px;
+  }
+
+  .celebration-text {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .media-container iframe {
+    width: 95vw;
+    height: calc(95vw * 0.5625);
+  }
+
+  .celebration-text {
+    font-size: 1.2rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .overlay-backdrop {
+    background: rgba(0, 0, 0, 0.95);
+  }
+
+  .close-btn {
+    background: rgba(255, 255, 255, 0.8);
+    color: black;
+    border: 2px solid white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .codecclimax-overlay,
+  .media-container,
+  .close-btn,
+  .celebration-text {
+    animation: none;
+    transition: none;
+  }
+
+  .confetti-container {
+    display: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .media-container {
+    background: #1a1a1a;
+  }
+}
+
+/* Light mode support */
+@media (prefers-color-scheme: light) {
+  .overlay-backdrop {
+    background: rgba(0, 0, 0, 0.9);
+  }
+}
+
+/* Focus management */
+.codecclimax-overlay:focus-within .media-container {
+  outline: 3px solid #4ecdc4;
+  outline-offset: 3px;
+}
+
+/* Loading state */
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}

@@ -1,0 +1,14 @@
+<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="iconGradient48" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="8" fill="url(#iconGradient48)"/>
+  <text x="24" y="34" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white" text-anchor="middle">CC</text>
+  <!-- Mountain range -->
+  <path d="M10,28 L18,18 L24,24 L30,16 L38,26" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="16" cy="14" r="2" fill="white"/>
+  <circle cx="32" cy="12" r="1.5" fill="white"/>
+</svg>
