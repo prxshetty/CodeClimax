@@ -15,8 +15,7 @@ CodeClimax is a minimalist Chrome extension that celebrates your problem-solving
 ### 🎬 Media Support
 - **YouTube Videos**: Add 10-second clips from any YouTube video
 - **Tenor GIFs**: Add high-quality GIFs from Tenor
-- **Smart Selection**: Choose specific media for celebrations or let the app pick favorites
-- **Favorites System**: Mark your best celebrations as favorites
+- **Easy Selection**: Choose specific media for celebrations with one click
 
 ### 🎨 Clean Design
 - **LeetCode Theme**: Black, yellow, and white color scheme that matches LeetCode
@@ -31,11 +30,6 @@ CodeClimax is a minimalist Chrome extension that celebrates your problem-solving
 ---
 
 ## 🚀 Installation
-
-### Method 1: Chrome Web Store (Coming Soon)
-*Search for "CodeClimax" on the Chrome Web Store*
-
-### Method 2: Developer Installation (Recommended for now)
 
 1. **Download the extension**
    ```bash
@@ -91,11 +85,6 @@ CodeClimax is a minimalist Chrome extension that celebrates your problem-solving
 
 ### Managing Your Library
 
-**Edit Media:**
-- Click the ✏️ edit button on any media item
-- Change the name, mark as favorite, or set as selected
-- Click "Save" to apply changes
-
 **Delete Media:**
 - Click the 🗑️ delete button on any media item
 - Confirm the deletion
@@ -121,9 +110,8 @@ CodeClimax automatically detects when you successfully solve a LeetCode problem 
 When you solve a problem, CodeClimax chooses celebration media in this order:
 
 1. **User Selected**: If you explicitly selected media, it plays first
-2. **User Favorites**: Your favorite user-uploaded media
-3. **User Uploads**: Any media you've uploaded
-4. **Default**: The classic DiCaprio celebration
+2. **User Uploads**: Any media you've uploaded
+3. **Default**: The classic DiCaprio celebration
 
 ### Storage
 - All media and settings are stored locally in your browser
@@ -144,10 +132,6 @@ When you solve a problem, CodeClimax chooses celebration media in this order:
 - **Toggle Selection**: Click a selected item again to deselect
 - **One Selection Only**: Only one media can be selected at a time
 
-### Favorites System
-- Mark media as favorites in the edit dialog
-- Favorites get priority in automatic selection
-- Favorites show a ⭐ star indicator
 
 ---
 
@@ -201,10 +185,9 @@ If everything else fails:
 - **Meme Reactions**: Popular celebration memes
 
 ### Pro Tips
-- Set multiple favorites for variety
-- Use the edit dialog to give media meaningful names
-- Selected media always plays, regardless of favorites
+- Selected media always plays when you solve a problem
 - Clear media library periodically to remove unused items
+- Test your media by selecting it and solving a problem
 
 ---
 
@@ -257,40 +240,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🙏 Acknowledgments
 
-- **LeetCode Community**: For the inspiration and platform
-- **Tenor**: For providing high-quality GIFs
-- **YouTube**: For amazing video content
-- **Open Source Community**: For tools and resources
-
----
-
-## 📞 Support
-
-- 📧 **Email**: support@codecclimax.dev
-- 🐛 **Issues**: [GitHub Issues](https://github.com/prxshetty/CodeClimax/issues)
-- 💬 **Discussion**: [GitHub Discussions](https://github.com/prxshetty/CodeClimax/discussions)
-- 📖 **Documentation**: [Wiki](https://github.com/prxshetty/CodeClimax/wiki)
-
----
-
-## 🗺️ Roadmap
-
-### Version 1.1 (Planned)
-- [ ] Chrome Web Store release
-- [ ] More media sources (GIPHY, etc.)
-- [ ] Sound effects support
-- [ ] Custom duration settings
-
-### Version 1.2 (Future)
-- [ ] Keyboard shortcuts
-- [ ] Dark/Light theme toggle
-- [ ] Statistics dashboard
-- [ ] Share celebrations with friends
-
----
-
-**Happy Coding!** 🎉🚀
-
-*Made with ❤️ by the CodeClimax team*
