@@ -6,21 +6,22 @@ class CodeClimaxContent {
     this.isShowingCelebration = false;
     this.currentOverlay = null;
     this.lastSuccessUrl = null;
+    this.submissionButtonClicked = false; // NEW: Track if user just submitted
     this.init();
   }
 
   async init() {
-    console.log('CodeClimax initialized');
-
     // Check if extension is enabled
     const settings = await this.getSettings();
     if (!settings?.enabled) {
-      console.log('CodeClimax is disabled');
       return;
     }
 
     // Start monitoring for successful submissions
     this.monitorSubmissions();
+
+    // NEW: Listen for submit button clicks (both mouse and keyboard)
+    this.listenForSubmitButton();
 
     // Listen for navigation changes
     this.observePageChanges();
@@ -31,7 +32,6 @@ class CodeClimaxContent {
         this.isActive = request.enabled;
         sendResponse({ success: true });
       } else if (request.action === 'toggleApiMonitoring') {
-        console.log('CodeClimax: Celebration detection toggled:', request.enabled);
         sendResponse({ success: true });
       }
     });
@@ -53,32 +53,80 @@ class CodeClimaxContent {
     }
   }
 
+  // NEW: Listen for submit button clicks and keyboard shortcuts
+  listenForSubmitButton() {
+    // Method 1: Listen for clicks on the Submit button
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      
+      // Check if Submit button was clicked
+      const isSubmitButton = 
+        target.textContent?.trim().toLowerCase() === 'submit' ||
+        target.getAttribute('data-e2e-locator') === 'console-submit-button' ||
+        target.closest('button')?.textContent?.trim().toLowerCase() === 'submit';
+      
+      if (isSubmitButton) {
+        this.markSubmissionStarted();
+      }
+    }, true);
+
+    // Method 2: Listen for keyboard shortcuts (Cmd+Enter / Ctrl+Enter)
+    document.addEventListener('keydown', (event) => {
+      // Check for Cmd+Enter (Mac) or Ctrl+Enter (Windows/Linux)
+      const isSubmitShortcut = 
+        (event.metaKey || event.ctrlKey) && 
+        event.key === 'Enter';
+      
+      if (isSubmitShortcut) {
+        this.markSubmissionStarted();
+      }
+    }, true);
+  }
+
+  // NEW: Mark that a submission was started
+  markSubmissionStarted() {
+    this.submissionButtonClicked = true;
+    
+    // Reset flag after 30 seconds (handles failed/incorrect submissions)
+    setTimeout(() => {
+      if (this.submissionButtonClicked) {
+        this.submissionButtonClicked = false;
+      }
+    }, 30000);
+  }
+
   observePageChanges() {
     // Reset state when navigating to a new problem
     const currentUrl = window.location.href;
     if (this.lastSuccessUrl && this.lastSuccessUrl !== currentUrl) {
-      console.log('CodeClimax: URL changed, resetting celebration state');
       this.isShowingCelebration = false;
       this.currentOverlay = null;
+      this.submissionButtonClicked = false; // NEW: Reset submit flag on navigation
     }
 
-    // Listen for navigation changes
-    let lastUrl = currentUrl;
-    const checkUrlChange = () => {
-      if (lastUrl !== window.location.href) {
-        lastUrl = window.location.href;
-        if (this.isShowingCelebration) {
-          console.log('CodeClimax: Navigation detected, closing any active celebration');
-          this.closeCurrentCelebration();
-        }
-        this.isShowingCelebration = false;
-        this.currentOverlay = null;
-        // Don't reset lastSuccessUrl here - let success detection handle it
-      }
+    // Watch for URL changes (SPA navigation)
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+    
+    const detector = this;
+    history.pushState = function(...args) {
+      originalPushState.apply(this, args);
+      // Reset flag when navigating to prevent stale state
+      detector.submissionButtonClicked = false;
     };
-
-    // Note: Removed URL-based celebration closing to prevent celebrations from closing immediately
-    // Celebrations now rely on their auto-close timers and manual dismissal only
+    
+    history.replaceState = function(...args) {
+      originalReplaceState.apply(this, args);
+      detector.submissionButtonClicked = false;
+    };
+    
+    // Listen for browser back/forward
+    window.addEventListener('popstate', () => {
+      this.submissionButtonClicked = false;
+      if (this.isShowingCelebration) {
+        this.closeCurrentCelebration();
+      }
+    });
   }
 
   closeCurrentCelebration() {
@@ -90,28 +138,32 @@ class CodeClimaxContent {
   }
 
   monitorSubmissions() {
-    // Create a MutationObserver to watch for DOM changes
+    // Create a MutationObserver to watch for DOM changes (more efficient than polling)
     const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          this.checkForSuccessNotification();
-        }
-      });
+      // Only check if there were actual node additions
+      const hasAddedNodes = mutations.some(mutation => mutation.addedNodes.length > 0);
+      
+      if (hasAddedNodes) {
+        this.checkForSuccessNotification();
+      }
     });
 
     // Start observing the document body
     observer.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class'] // Watch for class changes (success indicators often change classes)
     });
-
-    // Also check periodically as a fallback
-    setInterval(() => {
-      this.checkForSuccessNotification();
-    }, 3000); // Increased interval to reduce checks
   }
 
   checkForSuccessNotification() {
+    // CRITICAL: Only detect if user just clicked submit
+    // This prevents triggering on old submissions in history
+    if (!this.submissionButtonClicked) {
+      return; // Don't detect unless user just submitted
+    }
+
     if (!this.isActive || this.isShowingCelebration) return;
 
     const now = Date.now();
@@ -125,30 +177,18 @@ class CodeClimaxContent {
       // Debounce - don't show multiple celebrations in quick succession
       if (now - this.lastSubmissionTime < 8000) return;
 
-      // Time-based protection - don't show celebrations too frequently (prevents old submissions from triggering)
-      if (now - this.lastCelebrationTime < 30000) {
-        console.log('CodeClimax: Skipping celebration - shown too recently');
-        return;
-      }
-
-      // Check current URL to avoid duplicate triggers on same page
-      const currentUrl = window.location.href;
-      if (this.lastSuccessUrl === currentUrl) {
-        return;
-      }
-
       // Look for various success indicators on LeetCode
       const successSelectors = [
         '[data-e2e-locator="submission-result"]',
         '.success__3Ai7',
         '[data-cy="submission-result"]',
         '.text-success',
+        '#result-state',
         '[class*="success"]',
         '[class*="accepted"]'
       ];
 
       let successFound = false;
-      let successText = '';
 
       for (const selector of successSelectors) {
         const element = document.querySelector(selector);
@@ -156,26 +196,30 @@ class CodeClimaxContent {
           const text = element.textContent.toLowerCase();
           if (text.includes('accepted') || text.includes('success') || text.includes('passed')) {
             successFound = true;
-            successText = text;
-            console.log('CodeClimax: Success detected via selector:', selector, 'Text:', text);
             break;
           }
         }
       }
 
-      // Also check for the green success banner
-      const successBanner = document.querySelector('[class*="success"]');
-      if (successBanner && successBanner.textContent.toLowerCase().includes('accepted')) {
+      // Check for normal problem success (specific check)
+      const successTag = document.querySelector('.success__3Ai7');
+      if (successTag && successTag.innerText.trim() === 'Success') {
         successFound = true;
-        successText = successBanner.textContent;
-        console.log('CodeClimax: Success detected via banner:', successText);
+      }
+
+      // Check for explore section success (specific check)
+      const resultState = document.getElementById('result-state');
+      if (resultState &&
+          resultState.className === 'text-success' &&
+          resultState.innerText === 'Accepted') {
+        successFound = true;
       }
 
       if (successFound) {
+        this.submissionButtonClicked = false; // Reset flag immediately
         this.lastSubmissionTime = now;
-        this.lastSuccessUrl = currentUrl;
+        this.lastSuccessUrl = window.location.href;
         this.lastCelebrationTime = now;
-        console.log('CodeClimax: Triggering celebration');
         this.showCelebration();
       }
     });
@@ -209,13 +253,11 @@ class CodeClimaxContent {
   async showCelebration() {
     // Don't show if already displaying a celebration
     if (this.isShowingCelebration) {
-      console.log('CodeClimax: Celebration already showing, skipping');
       return;
     }
 
     try {
       this.isShowingCelebration = true;
-      console.log('CodeClimax: Starting celebration display');
 
       // Check if extension context is still valid
       if (!chrome.storage || !chrome.storage.local) {
@@ -226,12 +268,8 @@ class CodeClimaxContent {
 
       const { celebrations, settings } = await chrome.storage.local.get(['celebrations', 'settings']);
 
-      console.log('CodeClimax: Available celebrations:', celebrations);
-      console.log('CodeClimax: Settings:', settings);
-
       // Only show user-uploaded media, skip if none available
       if (!celebrations?.length) {
-        console.log('CodeClimax: No celebrations found, skipping celebration');
         this.isShowingCelebration = false;
         return;
       }
@@ -240,7 +278,6 @@ class CodeClimaxContent {
       const userUploaded = celebrations.filter(c => !c.id.startsWith('default-celebration-'));
 
       if (userUploaded.length === 0) {
-        console.log('CodeClimax: No user-uploaded media found, skipping celebration');
         this.isShowingCelebration = false;
         return;
       }
@@ -250,9 +287,6 @@ class CodeClimaxContent {
       // First, check if user has specifically selected media that is user-uploaded
       if (settings?.selectedMedia) {
         selectedMedia = userUploaded.find(c => c.id === settings.selectedMedia);
-        if (selectedMedia) {
-          console.log('CodeClimax: Using user-selected media:', selectedMedia.name);
-        }
       }
 
       // If no selected media found, prioritize favorited user-uploaded media
@@ -261,15 +295,10 @@ class CodeClimaxContent {
 
         if (favoriteUserMedia) {
           selectedMedia = favoriteUserMedia;
-          console.log('CodeClimax: Using favorite user-uploaded media');
         } else {
           selectedMedia = userUploaded[0];
-          console.log('CodeClimax: Using first available user-uploaded media');
         }
       }
-
-      console.log('CodeClimax: Available celebrations count:', celebrations.length);
-      console.log('CodeClimax: Selected celebration media:', selectedMedia);
 
       // Validate media before attempting to display
       if (!this.validateMedia(selectedMedia)) {
@@ -300,12 +329,10 @@ class CodeClimaxContent {
 
   showDefaultCelebration() {
     // Don't show anything if no user-uploaded media is available
-    console.log('CodeClimax: No user-uploaded media available, skipping celebration');
     this.isShowingCelebration = false;
   }
 
   createOverlay(media) {
-    console.log('CodeClimax: Creating overlay for media:', media);
 
     if (!media || !media.type || !media.data) {
       console.error('CodeClimax: Invalid media object:', media);
@@ -346,14 +373,6 @@ class CodeClimaxContent {
     `;
 
     let mediaElement = '';
-
-    // Debug logging to help troubleshoot GIF display issues
-    console.log('CodeClimax: Rendering media:', {
-      type: media.type,
-      data: media.data,
-      name: media.name,
-      thumbnail: media.thumbnail
-    });
 
     switch (media.type) {
       case 'image':
@@ -440,7 +459,6 @@ class CodeClimaxContent {
 
     // Close function
     const closeOverlay = () => {
-      console.log('CodeClimax: Closing celebration overlay');
       this.isShowingCelebration = false;
       this.currentOverlay = null;
 
@@ -511,7 +529,6 @@ class CodeClimaxContent {
 
     const autoCloseTimer = setTimeout(() => {
       if (this.currentOverlay === overlay) {
-        console.log('CodeClimax: Auto-closing celebration after', autoCloseTime, 'ms');
         closeOverlay();
       }
     }, autoCloseTime);
