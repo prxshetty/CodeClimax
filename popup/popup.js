@@ -22,7 +22,8 @@ class CodeClimaxPopup {
     const result = await chrome.storage.local.get(['settings', 'celebrations']);
     this.settings = result.settings || {
       enabled: true,
-      selectedMedia: null
+      selectedMedia: null,
+      apiMonitoringEnabled: true
     };
     this.celebrations = result.celebrations || [];
   }
@@ -52,11 +53,19 @@ class CodeClimaxPopup {
         this.clearAllMedia();
       }
     });
+
+    // API monitoring toggle
+    document.getElementById('apiMonitoringToggle').addEventListener('change', (e) => {
+      this.handleApiMonitoringToggle(e.target.checked);
+    });
   }
 
   renderUI() {
     // Render media library
     this.renderMediaLibrary();
+
+    // Set toggle state
+    document.getElementById('apiMonitoringToggle').checked = this.settings.apiMonitoringEnabled !== false; // Default to true
   }
 
   renderMediaLibrary() {
@@ -332,6 +341,29 @@ class CodeClimaxPopup {
     await this.saveData();
     this.renderMediaLibrary();
     this.showToast('All media cleared successfully', 'success');
+  }
+
+  async handleApiMonitoringToggle(isEnabled) {
+    this.settings.apiMonitoringEnabled = isEnabled;
+    await this.saveData();
+
+    // Notify content script about the toggle change
+    try {
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tabs.length > 0) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: 'toggleApiMonitoring',
+          enabled: isEnabled
+        });
+      }
+    } catch (error) {
+      console.log('Could not notify content script:', error);
+    }
+
+    const message = isEnabled
+      ? '🔥 CLIMAX ON!'
+      : '🥶 CLIMAX OFF!';
+    this.showToast(message, isEnabled ? 'success' : 'warning');
   }
 
   generateId() {

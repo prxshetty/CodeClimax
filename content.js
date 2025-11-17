@@ -30,6 +30,9 @@ class CodeClimaxContent {
       if (request.action === 'toggleExtension') {
         this.isActive = request.enabled;
         sendResponse({ success: true });
+      } else if (request.action === 'toggleApiMonitoring') {
+        console.log('CodeClimax: Celebration detection toggled:', request.enabled);
+        sendResponse({ success: true });
       }
     });
   }
@@ -113,86 +116,69 @@ class CodeClimaxContent {
 
     const now = Date.now();
 
-    // Debounce - don't show multiple celebrations in quick succession
-    if (now - this.lastSubmissionTime < 8000) return;
-
-    // Time-based protection - don't show celebrations too frequently (prevents old submissions from triggering)
-    if (now - this.lastCelebrationTime < 30000) {
-      console.log('CodeClimax: Skipping celebration - shown too recently');
-      return;
-    }
-
-    // Check current URL to avoid duplicate triggers on same page
-    const currentUrl = window.location.href;
-    if (this.lastSuccessUrl === currentUrl) {
-      return;
-    }
-
-    // Look for various success indicators on LeetCode
-    const successSelectors = [
-      '[data-e2e-locator="submission-result"]',
-      '.success__3Ai7',
-      '[data-cy="submission-result"]',
-      '.text-success',
-      '[class*="success"]',
-      '[class*="accepted"]'
-    ];
-
-    let successFound = false;
-    let successText = '';
-
-    for (const selector of successSelectors) {
-      const element = document.querySelector(selector);
-      if (element) {
-        const text = element.textContent.toLowerCase();
-        if (text.includes('accepted') || text.includes('success') || text.includes('passed')) {
-          successFound = true;
-          successText = text;
-          console.log('CodeClimax: Success detected via selector:', selector, 'Text:', text);
-          break;
-        }
+    // Check if extension is enabled via toggle
+    this.getSettings().then(settings => {
+      if (settings.apiMonitoringEnabled === false) {
+        return; // Skip if disabled by toggle
       }
-    }
 
-    // Also check for the green success banner
-    const successBanner = document.querySelector('[class*="success"]');
-    if (successBanner && successBanner.textContent.toLowerCase().includes('accepted')) {
-      successFound = true;
-      successText = successBanner.textContent;
-      console.log('CodeClimax: Success detected via banner:', successText);
-    }
+      // Debounce - don't show multiple celebrations in quick succession
+      if (now - this.lastSubmissionTime < 8000) return;
 
-    if (successFound) {
-      this.lastSubmissionTime = now;
-      this.lastSuccessUrl = currentUrl;
-      this.lastCelebrationTime = now;
-      console.log('CodeClimax: Triggering celebration');
-      this.showCelebration();
-    }
-  }
+      // Time-based protection - don't show celebrations too frequently (prevents old submissions from triggering)
+      if (now - this.lastCelebrationTime < 30000) {
+        console.log('CodeClimax: Skipping celebration - shown too recently');
+        return;
+      }
 
-  interceptNetworkRequests() {
-    // Override fetch to intercept API responses
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-      const response = await originalFetch(...args);
+      // Check current URL to avoid duplicate triggers on same page
+      const currentUrl = window.location.href;
+      if (this.lastSuccessUrl === currentUrl) {
+        return;
+      }
 
-      try {
-        const url = args[0];
-        if (typeof url === 'string' && url.includes('/submit/') && response.ok) {
-          const clone = response.clone();
-          const data = await clone.json();
+      // Look for various success indicators on LeetCode
+      const successSelectors = [
+        '[data-e2e-locator="submission-result"]',
+        '.success__3Ai7',
+        '[data-cy="submission-result"]',
+        '.text-success',
+        '[class*="success"]',
+        '[class*="accepted"]'
+      ];
 
-          if (data.status === 10 || data.status_msg === 'Accepted') {
-            this.showCelebration();
+      let successFound = false;
+      let successText = '';
+
+      for (const selector of successSelectors) {
+        const element = document.querySelector(selector);
+        if (element) {
+          const text = element.textContent.toLowerCase();
+          if (text.includes('accepted') || text.includes('success') || text.includes('passed')) {
+            successFound = true;
+            successText = text;
+            console.log('CodeClimax: Success detected via selector:', selector, 'Text:', text);
+            break;
           }
         }
-      } catch (error) {
-        // Silently ignore network parsing errors
       }
 
-      return response;
-    };
+      // Also check for the green success banner
+      const successBanner = document.querySelector('[class*="success"]');
+      if (successBanner && successBanner.textContent.toLowerCase().includes('accepted')) {
+        successFound = true;
+        successText = successBanner.textContent;
+        console.log('CodeClimax: Success detected via banner:', successText);
+      }
+
+      if (successFound) {
+        this.lastSubmissionTime = now;
+        this.lastSuccessUrl = currentUrl;
+        this.lastCelebrationTime = now;
+        console.log('CodeClimax: Triggering celebration');
+        this.showCelebration();
+      }
+    });
   }
 
   validateMedia(media) {
