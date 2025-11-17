@@ -4,15 +4,20 @@
 
 # CodeClimax 
 
-**Level up your LeetCode experience with custom celebration media!**
+A Chrome extension that celebrates your problem-solving successes with custom media. When you solve a LeetCode problem, the extension detects your success and displays a celebration overlay with your chosen media.
 
-CodeClimax is a minimalist Chrome extension that celebrates your problem-solving successes with custom media. When you solve a LeetCode problem, the extension detects your success and displays a celebration overlay with your chosen media.
 
-## 📸 Extension Preview
+<table>
+  <tr>
+    <td>
+      <img src="assets/screenshots/popup-demo.png" width="350" />
+    </td>
+    <td>
+      <img src="https://github.com/user-attachments/assets/d0019f57-6466-4b1a-98b1-c303f71d39ca" width="350" />
+    </td>
+  </tr>
+</table>
 
-<div align="center">
-  <img src="assets/screenshots/popup-demo.png" alt="CodeClimax Extension Interface" width="600">
-</div>
 
 ---
 
