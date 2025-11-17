@@ -297,6 +297,19 @@ We welcome contributions! Here's how to help:
 
 ---
 
+## 🔒 Privacy Policy
+
+Your privacy is important to us. CodeClimax is designed to be privacy-focused:
+
+- **Local Storage Only**: All data is stored locally in your browser
+- **No Personal Data Collection**: We don't collect personal information, browsing history, or transmit data to servers
+- **User Control**: You have complete control over your celebration media and settings
+- **Transparency**: Full transparency about what data is stored and why
+
+**Read our full [Privacy Policy](PRIVACY.md)** for detailed information about data handling and your rights.
+
+---
+
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE)
