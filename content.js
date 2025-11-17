@@ -458,19 +458,30 @@ class CodeClimaxContent {
     `;
 
     // Close function
-    const closeOverlay = () => {
+    const closeOverlay = (isManual = true) => {
       this.isShowingCelebration = false;
       this.currentOverlay = null;
 
-      overlay.classList.add('fade-out');
-      setTimeout(() => {
+      if (isManual) {
+        // Instant removal for manual close
         if (overlay.parentNode) {
           overlay.remove();
         }
         if (style.parentNode) {
           style.remove();
         }
-      }, 500);
+      } else {
+        // Keep fade animation for auto-close
+        overlay.classList.add('fade-out');
+        setTimeout(() => {
+          if (overlay.parentNode) {
+            overlay.remove();
+          }
+          if (style.parentNode) {
+            style.remove();
+          }
+        }, 200); // Reduced from 500ms to 200ms
+      }
     };
 
     closeBtn.addEventListener('click', closeOverlay);
@@ -501,7 +512,7 @@ class CodeClimaxContent {
         to { opacity: 0; }
       }
       .codecclimax-overlay.fade-out {
-        animation: fadeOut 0.5s ease forwards;
+        animation: fadeOut 0.2s ease forwards;
       }
     `;
     document.head.appendChild(style);
@@ -529,7 +540,7 @@ class CodeClimaxContent {
 
     const autoCloseTimer = setTimeout(() => {
       if (this.currentOverlay === overlay) {
-        closeOverlay();
+        closeOverlay(false); // false = auto-close (not manual)
       }
     }, autoCloseTime);
 
@@ -537,7 +548,7 @@ class CodeClimaxContent {
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
         clearTimeout(autoCloseTimer);
-        closeOverlay();
+        closeOverlay(true); // true = manual close
       }
     });
 
