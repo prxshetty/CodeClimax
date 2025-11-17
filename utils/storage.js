@@ -1,6 +1,3 @@
-// CodeClimax - LeetCode Celebration Extension
-// storage.js - Chrome storage wrapper utilities
-
 class CodeClimaxStorage {
   constructor() {
     this.storageArea = chrome.storage.local;

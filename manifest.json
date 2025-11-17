@@ -11,7 +11,14 @@
     "https://leetcode.com/*",
     "https://www.youtube.com/*",
     "https://tenor.com/*",
-    "https://media.tenor.com/*"
+    "https://media.tenor.com/*",
+    "https://giphy.com/*",
+    "https://i.giphy.com/*",
+    "https://media.giphy.com/*",
+    "https://*.giphy.com/*",
+    "https://vimeo.com/*",
+    "https://player.vimeo.com/*",
+    "https://*.vimeo.com/*"
   ],
   "background": {
     "service_worker": "background.js"

@@ -2,7 +2,7 @@
   <img src="assets/icon-128.png" alt="CodeClimax Logo" width="120">
 </div>
 
-# CodeClimax 🏔️
+# CodeClimax 
 
 **Level up your LeetCode experience with custom celebration media!**
 
@@ -19,23 +19,24 @@ CodeClimax is a minimalist Chrome extension that celebrates your problem-solving
 ## ✨ Features
 
 ### 🎬 Media Support
-- **YouTube Videos**: Add 10-second clips from any YouTube video
+- **YouTube Videos**: Add clips from any YouTube video
+- **Vimeo Videos**: Add high-quality video clips from Vimeo
 - **Tenor GIFs**: Add high-quality GIFs from Tenor
+- **Giphy GIFs**: Add animated GIFs from Giphy
 - **Easy Selection**: Choose specific media for celebrations with one click
 
-### 🎨 Clean Design
-- **LeetCode Theme**: Black, yellow, and white color scheme that matches LeetCode
-- **Minimal Interface**: No clutter, just what you need
-- **Professional Look**: Clean typography and smooth animations
 
 ### ⚡ Easy to Use
-- **Single URL Input**: One input field for both YouTube and Tenor URLs
+- **Single URL Input**: One input field for all supported media platforms
 - **Click to Select**: Simply click on any media to select it for celebrations
 - **One-Click Management**: Easy edit, delete, and organize functionality
+- **Multi-Browser Support**: Works on Chrome, Edge, Brave, and Firefox
 
 ---
 
 ## 🚀 Installation
+
+### Quick Install (Recommended for most users)
 
 1. **Download the extension**
    ```bash
@@ -43,19 +44,98 @@ CodeClimax is a minimalist Chrome extension that celebrates your problem-solving
    cd CodeClimax
    ```
 
-2. **Open Chrome Extensions**
-   - Open Chrome browser
-   - Go to `chrome://extensions/`
-   - Enable **"Developer mode"** (top right toggle)
+2. **Choose your browser below** and follow the specific instructions
 
-3. **Load the extension**
-   - Click **"Load unpacked"**
-   - Select the `CodeClimax` folder you downloaded
-   - The extension is now installed!
+---
 
-4. **Verify installation**
-   - Look for the CodeClimax icon in your Chrome toolbar
-   - Click the icon to open the settings panel
+### 🌐 Google Chrome / Microsoft Edge
+
+**Step 1: Open Extensions Page**
+- **Chrome**: Go to `chrome://extensions/`
+- **Edge**: Go to `edge://extensions/`
+- Or use menu: Three dots → More tools → Extensions
+
+**Step 2: Enable Developer Mode**
+- Toggle **"Developer mode"** in top right corner
+- This enables loading unpacked extensions
+
+**Step 3: Load the Extension**
+- Click **"Load unpacked"** button
+- Navigate to and select the `CodeClimax` folder
+- Click "Select Folder"
+
+**Step 4: Verify Installation**
+- Look for CodeClimax icon in your browser toolbar
+- If you don't see it: Click puzzle piece icon → Pin CodeClimax
+- Click the icon to open settings panel
+
+---
+
+### 🦊 Mozilla Firefox
+
+**Step 1: Open Debug Mode**
+- Go to `about:debugging`
+- Click **"This Firefox"** in the left sidebar
+
+**Step 2: Load Temporary Add-on**
+- Click **"Load Temporary Add-on"**
+- Navigate to the `CodeClimax` folder
+- Select any file in the folder (like `manifest.json`)
+
+**Step 3: Note for Firefox**
+- The extension will only work for the current session
+- For permanent installation, you'll need to sign the extension
+- Consider using Chrome/Edge for better compatibility
+
+---
+
+### 🧪 Brave Browser
+
+**Step 1: Open Extensions**
+- Go to `brave://extensions/`
+- Or: Menu → Extensions
+
+**Step 2: Enable Developer Mode**
+- Toggle **"Developer mode"** switch
+
+**Step 3: Load Extension**
+- Click **"Load unpacked"**
+- Select the `CodeClimax` folder
+- Extension will be installed
+
+---
+
+### 🔧 Installation Troubleshooting
+
+**"Extension not allowed" Error**
+- Ensure you're loading a folder, not individual files
+- Check that `manifest.json` exists in the folder
+- Try different browser (Chrome/Edge recommended)
+
+**"Package is invalid" Error**
+- Verify all files are downloaded
+- Check `manifest.json` syntax
+- Ensure no files are corrupted
+
+**Icon Not Visible**
+- Click puzzle piece icon in toolbar
+- Find CodeClimax and click the pin icon
+- Extension should now appear in toolbar
+
+---
+
+### ✅ Verification Steps
+
+After installation, verify everything works:
+
+1. **Icon Check**: CodeClimax icon appears in toolbar
+2. **Popup Opens**: Click icon → settings panel opens
+3. **URL Input**: You can paste URLs in the input field
+4. **Test Media**: Try adding a YouTube or Tenor URL
+5. **LeetCode Test**: Visit a LeetCode problem page
+
+**Ready to Go! 🎉**
+Your CodeClimax extension is now installed and ready to celebrate your coding victories!
 
 ---
 
@@ -68,9 +148,9 @@ CodeClimax is a minimalist Chrome extension that celebrates your problem-solving
    - The settings panel will open
 
 2. **Add Media**
-   - Find a YouTube video or Tenor GIF you like
+   - Find a YouTube video, Vimeo video, Tenor GIF, or Giphy GIF you like
    - Copy the URL (examples below)
-   - Paste it into the "YouTube or Tenor URL" field
+   - Paste it into the URL field
    - Click "Add"
 
 3. **Select for Celebrations**
@@ -89,12 +169,19 @@ CodeClimax is a minimalist Chrome extension that celebrates your problem-solving
 **Tenor GIFs:**
 - `https://tenor.com/view/excited-celebration-dance-gif-12345678`
 
+**Giphy GIFs:**
+- `https://giphy.com/gifs/excited-celebration-dance-12345678`
+- `https://gph.is/excited-celebration-dance`
+
+**Vimeo Videos:**
+- `https://vimeo.com/123456789`
+- `https://player.vimeo.com/video/123456789`
+
 ### Managing Your Library
 
 **Delete Media:**
 - Click the 🗑️ delete button on any media item
-- Confirm the deletion
-- The media will be removed from your library
+- The media will be immediately removed from your library (no confirmation needed)
 
 **Clear All:**
 - Click the trash icon in the Media Library header
@@ -123,21 +210,6 @@ When you solve a problem, CodeClimax chooses celebration media in this order:
 - All media and settings are stored locally in your browser
 - No data is sent to external servers
 - Your privacy is protected
-
----
-
-## 🔧 Advanced Features
-
-### Keyboard Shortcuts
-- **Enter**: Submit URL when typing in the URL field
-- **Esc**: Close modal dialogs
-
-### Selection System
-- **Click to Select**: Click any media item to select it for celebrations
-- **Visual Feedback**: Selected items show a yellow border
-- **Toggle Selection**: Click a selected item again to deselect
-- **One Selection Only**: Only one media can be selected at a time
-
 
 ---
 
@@ -176,42 +248,6 @@ If everything else fails:
 
 ---
 
-## 💡 Tips & Tricks
-
-### For Best Experience
-1. **Use Short Clips**: YouTube videos work best with short, celebratory moments
-2. **High-Quality GIFs**: Tenor GIFs are optimized and load quickly
-3. **Organize**: Name your media clearly so you can find favorites easily
-4. **Test**: After adding media, test it by selecting it and solving a problem
-
-### Recommended Media Types
-- **Victory Scenes**: Movie celebration moments
-- **Dance GIFs**: Fun dance moves or celebrations
-- **Achievement Clips**: Gaming or sports victory moments
-- **Meme Reactions**: Popular celebration memes
-
-### Pro Tips
-- Selected media always plays when you solve a problem
-- Clear media library periodically to remove unused items
-- Test your media by selecting it and solving a problem
-
----
-
-## 🔒 Privacy & Security
-
-- ✅ **No Data Collection**: No data is sent to external servers
-- ✅ **Local Storage**: All media stored locally in your browser
-- ✅ **Minimal Permissions**: Only requires necessary permissions
-- ✅ **Open Source**: All code is transparent and reviewable
-- ✅ **No Tracking**: No analytics or tracking scripts
-
-### Permissions Explained
-- `storage`: Saves your media and settings locally
-- `activeTab`: Detects LeetCode success states
-- `host_permissions`: Access YouTube and Tenor for media validation
-
----
-
 ## 🤝 Contributing
 
 We welcome contributions! Here's how to help:
@@ -237,6 +273,22 @@ We welcome contributions! Here's how to help:
 3. Make your changes
 4. Test thoroughly
 5. Submit a pull request
+
+---
+
+## 📋 Changelog
+
+### Version 1.1.0 (Latest)
+- **Removed Confirmation Dialog**: Individual media items now delete immediately when clicking the 🗑️ button
+- **Added Giphy Support**: Import GIFs from Giphy URLs
+- **Added Vimeo Support**: Import video clips from Vimeo URLs
+- **Enhanced URL Support**: Expanded URL validation for all supported platforms
+
+### Version 1.0.0
+- Initial release with YouTube and Tenor support
+- Basic media library management
+- LeetCode success detection
+- Celebration overlay system
 
 ---
 

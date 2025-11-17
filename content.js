@@ -1,10 +1,8 @@
-// CodeClimax - LeetCode Celebration Extension
-// content.js - Injected into LeetCode problem pages
-
 class CodeClimaxContent {
   constructor() {
     this.isActive = true;
     this.lastSubmissionTime = 0;
+    this.lastCelebrationTime = 0;
     this.isShowingCelebration = false;
     this.currentOverlay = null;
     this.lastSuccessUrl = null;
@@ -76,11 +74,8 @@ class CodeClimaxContent {
       }
     };
 
-    // Check URL changes periodically
-    setInterval(checkUrlChange, 1000);
-
-    // Also listen to popstate for navigation
-    window.addEventListener('popstate', checkUrlChange);
+    // Note: Removed URL-based celebration closing to prevent celebrations from closing immediately
+    // Celebrations now rely on their auto-close timers and manual dismissal only
   }
 
   closeCurrentCelebration() {
@@ -120,6 +115,12 @@ class CodeClimaxContent {
 
     // Debounce - don't show multiple celebrations in quick succession
     if (now - this.lastSubmissionTime < 8000) return;
+
+    // Time-based protection - don't show celebrations too frequently (prevents old submissions from triggering)
+    if (now - this.lastCelebrationTime < 30000) {
+      console.log('CodeClimax: Skipping celebration - shown too recently');
+      return;
+    }
 
     // Check current URL to avoid duplicate triggers on same page
     const currentUrl = window.location.href;
@@ -164,6 +165,7 @@ class CodeClimaxContent {
     if (successFound) {
       this.lastSubmissionTime = now;
       this.lastSuccessUrl = currentUrl;
+      this.lastCelebrationTime = now;
       console.log('CodeClimax: Triggering celebration');
       this.showCelebration();
     }
@@ -193,6 +195,31 @@ class CodeClimaxContent {
     };
   }
 
+  validateMedia(media) {
+    if (!media) {
+      console.error('CodeClimax: Media object is null or undefined');
+      return false;
+    }
+
+    if (!media.type || !media.data) {
+      console.error('CodeClimax: Media object missing required type or data property');
+      return false;
+    }
+
+    const validTypes = ['image', 'gif', 'video', 'youtube'];
+    if (!validTypes.includes(media.type)) {
+      console.error('CodeClimax: Invalid media type:', media.type);
+      return false;
+    }
+
+    if (typeof media.data !== 'string' || media.data.trim() === '') {
+      console.error('CodeClimax: Media data is not a valid string');
+      return false;
+    }
+
+    return true;
+  }
+
   async showCelebration() {
     // Don't show if already displaying a celebration
     if (this.isShowingCelebration) {
@@ -204,47 +231,54 @@ class CodeClimaxContent {
       this.isShowingCelebration = true;
       console.log('CodeClimax: Starting celebration display');
 
+      // Check if extension context is still valid
+      if (!chrome.storage || !chrome.storage.local) {
+        console.error('CodeClimax: Extension context invalidated');
+        this.isShowingCelebration = false;
+        return;
+      }
+
       const { celebrations, settings } = await chrome.storage.local.get(['celebrations', 'settings']);
 
       console.log('CodeClimax: Available celebrations:', celebrations);
       console.log('CodeClimax: Settings:', settings);
 
-      // Show default celebration if no custom media
+      // Only show user-uploaded media, skip if none available
       if (!celebrations?.length) {
-        console.log('CodeClimax: No celebrations found, showing default');
-        this.showDefaultCelebration();
+        console.log('CodeClimax: No celebrations found, skipping celebration');
+        this.isShowingCelebration = false;
+        return;
+      }
+
+      // Filter to only user-uploaded media (exclude default celebrations)
+      const userUploaded = celebrations.filter(c => !c.id.startsWith('default-celebration-'));
+
+      if (userUploaded.length === 0) {
+        console.log('CodeClimax: No user-uploaded media found, skipping celebration');
+        this.isShowingCelebration = false;
         return;
       }
 
       let selectedMedia;
 
-      // First, check if user has specifically selected media
+      // First, check if user has specifically selected media that is user-uploaded
       if (settings?.selectedMedia) {
-        selectedMedia = celebrations.find(c => c.id === settings.selectedMedia);
+        selectedMedia = userUploaded.find(c => c.id === settings.selectedMedia);
         if (selectedMedia) {
           console.log('CodeClimax: Using user-selected media:', selectedMedia.name);
         }
       }
 
-      // If no selected media found, use smart selection logic
+      // If no selected media found, prioritize favorited user-uploaded media
       if (!selectedMedia) {
-        // Prioritize user-uploaded content over default celebration
-        const userUploaded = celebrations.filter(c => !c.id.startsWith('default-celebration-'));
         const favoriteUserMedia = userUploaded.find(c => c.isFavorite);
-        const favoriteMedia = celebrations.find(c => c.isFavorite);
 
         if (favoriteUserMedia) {
           selectedMedia = favoriteUserMedia;
           console.log('CodeClimax: Using favorite user-uploaded media');
-        } else if (userUploaded.length > 0) {
-          selectedMedia = userUploaded[0];
-          console.log('CodeClimax: Using first user-uploaded media');
-        } else if (favoriteMedia) {
-          selectedMedia = favoriteMedia;
-          console.log('CodeClimax: Using favorite default media');
         } else {
-          selectedMedia = celebrations[0];
-          console.log('CodeClimax: Using first available media');
+          selectedMedia = userUploaded[0];
+          console.log('CodeClimax: Using first available user-uploaded media');
         }
       }
 
@@ -253,8 +287,8 @@ class CodeClimaxContent {
 
       // Validate media before attempting to display
       if (!this.validateMedia(selectedMedia)) {
-        console.error('CodeClimax: Selected media failed validation, falling back to default');
-        this.showDefaultCelebration();
+        console.error('CodeClimax: Selected media failed validation, skipping celebration');
+        this.isShowingCelebration = false;
         return;
       }
 
@@ -263,98 +297,25 @@ class CodeClimaxContent {
       } catch (overlayError) {
         console.error('CodeClimax: Error creating overlay for custom media:', overlayError);
         this.isShowingCelebration = false;
-        this.showDefaultCelebration();
       }
     } catch (error) {
-      console.error('Error showing celebration:', error);
+      // Handle extension context invalidation gracefully
+      if (error.message && error.message.includes('Extension context invalidated')) {
+        console.error('CodeClimax: Extension context invalidated during celebration');
+        this.isActive = false;
+        this.isShowingCelebration = false;
+        return;
+      }
+
+      console.error('CodeClimax: Unexpected error showing celebration:', error);
       this.isShowingCelebration = false;
-      this.showDefaultCelebration();
     }
   }
 
   showDefaultCelebration() {
-    // Don't show if already displaying a celebration
-    if (this.isShowingCelebration) {
-      console.log('CodeClimax: Default celebration already showing, skipping');
-      return;
-    }
-
-    // Simple text celebration as fallback
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 30px 50px;
-      border-radius: 20px;
-      font-size: 32px;
-      font-weight: bold;
-      z-index: 999999;
-      animation: fadeIn 0.5s ease;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      cursor: pointer;
-    `;
-
-    overlay.innerHTML = `
-      <div>🎉 Problem Solved! 🎉</div>
-      <div style="font-size: 18px; margin-top: 10px; font-weight: normal;">Click to close</div>
-    `;
-
-    // Store reference
-    this.currentOverlay = overlay;
-
-    // Add CSS animation
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      }
-      @keyframes fadeOut {
-        from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        to { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-      }
-    `;
-    document.head.appendChild(style);
-
-    // Close function
-    const closeOverlay = () => {
-      console.log('CodeClimax: Closing default celebration overlay');
-      this.isShowingCelebration = false;
-      this.currentOverlay = null;
-
-      overlay.style.animation = 'fadeOut 0.5s ease forwards';
-      setTimeout(() => {
-        if (overlay.parentNode) {
-          overlay.remove();
-        }
-        if (style.parentNode) {
-          style.remove();
-        }
-      }, 500);
-    };
-
-    // Click to close
-    overlay.addEventListener('click', closeOverlay);
-
-    document.body.appendChild(overlay);
-
-    // Auto-remove after 3 seconds
-    const autoCloseTimer = setTimeout(() => {
-      if (this.currentOverlay === overlay) {
-        console.log('CodeClimax: Auto-closing default celebration');
-        closeOverlay();
-      }
-    }, 3000);
-
-    // Cleanup timer if overlay is manually closed
-    overlay.addEventListener('remove', () => {
-      clearTimeout(autoCloseTimer);
-    });
+    // Don't show anything if no user-uploaded media is available
+    console.log('CodeClimax: No user-uploaded media available, skipping celebration');
+    this.isShowingCelebration = false;
   }
 
   createOverlay(media) {
@@ -400,6 +361,14 @@ class CodeClimaxContent {
 
     let mediaElement = '';
 
+    // Debug logging to help troubleshoot GIF display issues
+    console.log('CodeClimax: Rendering media:', {
+      type: media.type,
+      data: media.data,
+      name: media.name,
+      thumbnail: media.thumbnail
+    });
+
     switch (media.type) {
       case 'image':
       case 'gif':
@@ -408,24 +377,45 @@ class CodeClimaxContent {
             src="${media.data}"
             alt="Celebration"
             style="display: block; max-width: 100%; max-height: 90vh; object-fit: contain; background: #f0f0f0;"
-            onerror="this.onerror=null; this.style.background='#ffcccc'; this.alt='Failed to load image'; console.error('CodeClimax: Failed to load image:', '${media.data}'); this.style.display='none'; this.parentElement.innerHTML+='<div style=\\"color: white; text-align: center; padding: 40px; font-family: Arial, sans-serif;\\"><h3>Celebration Media Failed to Load</h3><p>The GIF or image could not be loaded. This might be due to:<br>- Expired Tenor GIF link<br>- Network issues<br>- Blocked resource<br><br>Please try uploading your own celebration media!</p></div>';"
-            onload="if(this.naturalWidth === 0 || this.naturalHeight === 0) { this.onerror(); } else { console.log('CodeClimax: Image loaded successfully:', '${media.data}'); }"
+            loading="eager"
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+            onload="this.style.display='block'; this.nextElementSibling.style.display='none';"
           />
+          <div style="display: none; padding: 20px; color: white; text-align: center; background: rgba(0,0,0,0.8); border-radius: 8px;">
+            <p style="margin: 0; font-size: 16px;">Failed to load celebration media</p>
+            <p style="margin: 10px 0 0 0; font-size: 14px; opacity: 0.7;">Please check the media URL</p>
+            <p style="margin: 10px 0 0 0; font-size: 12px; opacity: 0.5;">URL: ${media.data.substring(0, 50)}${media.data.length > 50 ? '...' : ''}</p>
+          </div>
         `;
         break;
 
       case 'video':
-        mediaElement = `
-          <video autoplay muted loop style="display: block; max-width: 100%; max-height: 90vh; object-fit: contain;">
-            <source src="${media.data}" type="video/mp4">
-          </video>
-        `;
+        // Check if this is an iframe embed (Vimeo) or direct video file
+        if (media.data.includes('player.vimeo.com') || media.data.includes('vimeo.com')) {
+          mediaElement = `
+            <iframe
+              src="${media.data}"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen
+              style="width: 800px; height: 450px; max-width: 90vw; border: none; border-radius: 8px;"
+            ></iframe>
+          `;
+        } else {
+          mediaElement = `
+            <video autoplay muted loop style="display: block; max-width: 100%; max-height: 90vh; object-fit: contain;">
+              <source src="${media.data}" type="video/mp4">
+            </video>
+          `;
+        }
         break;
 
       case 'youtube':
         mediaElement = `
           <iframe
-            src="https://www.youtube.com/embed/${media.data}?autoplay=1&mute=0&start=0&end=10&controls=1&rel=0&modestbranding=1"
+            src="https://www.youtube.com/embed/${media.data}?autoplay=1&mute=0&start=0&controls=1&rel=0&modestbranding=1"
             frameborder="0"
             allow="autoplay; encrypted-media"
             allowfullscreen
@@ -437,23 +427,29 @@ class CodeClimaxContent {
 
     mediaContainer.innerHTML = mediaElement;
 
-    // Add close button
+    // Add close button positioned at top right of viewport
     const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = '×';
+    closeBtn.innerHTML = `
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6L6 18M6 6l12 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
     closeBtn.style.cssText = `
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 40px;
-      height: 40px;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
-      font-size: 24px;
+      background: rgba(0,0,0,0.6);
+      border: 2px solid rgba(255,255,255,0.3);
       cursor: pointer;
-      transition: background 0.2s;
-      z-index: 10;
+      transition: all 0.2s;
+      z-index: 1000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
     `;
 
     // Close function
@@ -476,15 +472,19 @@ class CodeClimaxContent {
     closeBtn.addEventListener('click', closeOverlay);
 
     closeBtn.addEventListener('mouseenter', () => {
-      closeBtn.style.background = 'rgba(255,255,255,0.3)';
+      closeBtn.style.background = 'rgba(0,0,0,0.8)';
+      closeBtn.style.borderColor = 'rgba(255,255,255,0.5)';
+      closeBtn.style.transform = 'scale(1.1)';
     });
 
     closeBtn.addEventListener('mouseleave', () => {
-      closeBtn.style.background = 'rgba(255,255,255,0.2)';
+      closeBtn.style.background = 'rgba(0,0,0,0.6)';
+      closeBtn.style.borderColor = 'rgba(255,255,255,0.3)';
+      closeBtn.style.transform = 'scale(1)';
     });
 
-    mediaContainer.appendChild(closeBtn);
     overlay.appendChild(mediaContainer);
+    overlay.appendChild(closeBtn);
 
     // Add CSS animations
     const style = document.createElement('style');
@@ -517,7 +517,7 @@ class CodeClimaxContent {
         autoCloseTime = 15000; // 15 seconds for videos
         break;
       case 'youtube':
-        autoCloseTime = 12000; // 12 seconds for YouTube (with controls)
+        autoCloseTime = 30000; // 30 seconds for YouTube (let users enjoy the video)
         break;
       default:
         autoCloseTime = 5000;

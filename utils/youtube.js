@@ -1,6 +1,3 @@
-// CodeClimax - LeetCode Celebration Extension
-// youtube.js - YouTube video handling utilities
-
 class YouTubeHandler {
   constructor() {
     this.apiKey = null; // Optional: for advanced features
@@ -73,13 +70,12 @@ class YouTubeHandler {
       autoplay: 1,
       mute: 1,
       start: 0,
-      end: 10,
-      controls: 0,
+      controls: 1,
       rel: 0,
       modestbranding: 1,
       showinfo: 0,
       iv_load_policy: 3,
-      disablekb: 1
+      disablekb: 0
     };
 
     const finalOptions = { ...defaultOptions, ...options };

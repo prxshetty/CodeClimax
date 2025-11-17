@@ -1,6 +1,3 @@
-// CodeClimax - LeetCode Celebration Extension
-// tenor.js - Tenor GIF handling utilities
-
 class TenorHandler {
   constructor() {
     this.cache = new Map();

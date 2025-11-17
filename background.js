@@ -1,12 +1,12 @@
-// CodeClimax - LeetCode Celebration Extension
-// background.js - Service worker for extension lifecycle and media processing
-
-// Import TenorHandler utility
 importScripts('utils/tenor.js');
+importScripts('utils/giphy.js');
+importScripts('utils/vimeo.js');
 
 class CodeClimaxBackground {
   constructor() {
     this.tenorHandler = new TenorHandler();
+    this.giphyHandler = new GiphyHandler();
+    this.vimeoHandler = new VimeoHandler();
     this.init();
   }
 
@@ -40,18 +40,7 @@ class CodeClimaxBackground {
       enabled: true
     };
 
-    const defaultCelebrations = [
-      {
-        id: 'default-celebration-dicaprio-damn',
-        type: 'gif',
-        data: 'https://media.tenor.com/16466118.gif',
-        duration: 8,
-        name: 'Leonardo DiCaprio - Damn!',
-        thumbnail: 'https://media.tenor.com/16466118.gif',
-        isFavorite: false,
-        uploadedAt: Date.now()
-      }
-    ];
+    const defaultCelebrations = [];
 
     try {
       await chrome.storage.local.set({
@@ -105,6 +94,16 @@ class CodeClimaxBackground {
         case 'validateTenor':
           const tenorValidation = await this.validateTenorGif(request.url);
           sendResponse(tenorValidation);
+          break;
+
+        case 'validateGiphy':
+          const giphyValidation = await this.validateGiphyGif(request.url);
+          sendResponse(giphyValidation);
+          break;
+
+        case 'validateVimeo':
+          const vimeoValidation = await this.validateVimeoVideo(request.url);
+          sendResponse(vimeoValidation);
           break;
 
         case 'getStorageUsage':
@@ -283,6 +282,69 @@ class CodeClimaxBackground {
     }
   }
 
+  async validateGiphyGif(url) {
+    try {
+      console.log('Background: Processing Giphy URL:', url);
+
+      // Use the GiphyHandler utility to validate and extract GIF data
+      const validation = await this.giphyHandler.validateGiphyGif(url);
+
+      if (validation.valid) {
+        console.log('Background: Giphy GIF validation successful:', validation);
+        return {
+          valid: true,
+          gifId: validation.giphyId,
+          title: validation.title,
+          gifUrl: validation.gifUrl,
+          thumbnailUrl: validation.thumbnail,
+          originalUrl: validation.url
+        };
+      } else {
+        console.log('Background: Giphy GIF validation failed:', validation.error);
+        return {
+          valid: false,
+          error: validation.error
+        };
+      }
+    } catch (error) {
+      console.error('Background: Error validating Giphy GIF:', error);
+      return { valid: false, error: error.message };
+    }
+  }
+
+  async validateVimeoVideo(url) {
+    try {
+      console.log('Background: Processing Vimeo URL:', url);
+
+      // Use the VimeoHandler utility to validate and extract video data
+      const validation = await this.vimeoHandler.validateVimeoVideo(url);
+
+      if (validation.valid) {
+        console.log('Background: Vimeo video validation successful:', validation);
+        return {
+          valid: true,
+          videoId: validation.videoId,
+          title: validation.title,
+          thumbnail: validation.thumbnail,
+          duration: validation.duration,
+          author: validation.author,
+          hash: validation.hash,
+          embedUrl: this.vimeoHandler.generateEmbedURL(validation.videoId, { hash: validation.hash })
+        };
+      } else {
+        console.log('Background: Vimeo video validation failed:', validation.error);
+        return {
+          valid: false,
+          error: validation.error
+        };
+      }
+    } catch (error) {
+      console.error('Background: Error validating Vimeo video:', error);
+      return { valid: false, error: error.message };
+    }
+  }
+
+  
   async getStorageUsage() {
     try {
       const result = await chrome.storage.local.getBytesInUse();

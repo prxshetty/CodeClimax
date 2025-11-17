@@ -1,6 +1,3 @@
-// CodeClimax - LeetCode Celebration Extension
-// popup.js - Clean media management interface
-
 class CodeClimaxPopup {
   constructor() {
     this.celebrations = [];
@@ -139,10 +136,14 @@ class CodeClimaxPopup {
       // Determine the type based on URL
       if (url.includes('youtube.com') || url.includes('youtu.be')) {
         await this.handleYouTubeAdd(url);
+      } else if (url.includes('vimeo.com')) {
+        await this.handleVimeoAdd(url);
       } else if (url.includes('tenor.com')) {
         await this.handleTenorAdd(url);
+      } else if (url.includes('giphy.com') || url.includes('gph.is')) {
+        await this.handleGiphyAdd(url);
       } else {
-        throw new Error('Invalid URL. Please enter a YouTube or Tenor URL.');
+        throw new Error('Invalid URL. Please enter a YouTube, Vimeo, Tenor, or Giphy URL.');
       }
     } catch (error) {
       this.showToast(`Error adding media: ${error.message}`, 'error');
@@ -173,11 +174,15 @@ class CodeClimaxPopup {
     };
 
     this.celebrations.push(celebration);
+
+    // Auto-select the newly uploaded media
+    this.settings.selectedMedia = celebration.id;
+
     await this.saveData();
     this.renderMediaLibrary();
 
     document.getElementById('mediaUrl').value = '';
-    this.showToast('YouTube video added successfully', 'success');
+    this.showToast('YouTube video added and selected', 'success');
   }
 
   async handleTenorAdd(url) {
@@ -204,13 +209,88 @@ class CodeClimaxPopup {
     };
 
     this.celebrations.push(celebration);
+
+    // Auto-select the newly uploaded media
+    this.settings.selectedMedia = celebration.id;
+
     await this.saveData();
     this.renderMediaLibrary();
 
     document.getElementById('mediaUrl').value = '';
-    this.showToast('Tenor GIF added successfully', 'success');
+    this.showToast('Tenor GIF added and selected', 'success');
   }
 
+  async handleGiphyAdd(url) {
+    // Send validation request to background script
+    const response = await chrome.runtime.sendMessage({
+      action: 'validateGiphy',
+      url: url
+    });
+
+    if (!response.valid) {
+      throw new Error(response.error);
+    }
+
+    // Create Giphy GIF celebration
+    const celebration = {
+      id: this.generateId(),
+      type: 'gif',
+      data: response.gifUrl,
+      duration: 8,
+      name: `Giphy: ${response.title || response.gifId}`,
+      thumbnail: response.thumbnailUrl,
+      isFavorite: false,
+      uploadedAt: Date.now()
+    };
+
+    this.celebrations.push(celebration);
+
+    // Auto-select the newly uploaded media
+    this.settings.selectedMedia = celebration.id;
+
+    await this.saveData();
+    this.renderMediaLibrary();
+
+    document.getElementById('mediaUrl').value = '';
+    this.showToast('Giphy GIF added and selected', 'success');
+  }
+
+  async handleVimeoAdd(url) {
+    // Send validation request to background script
+    const response = await chrome.runtime.sendMessage({
+      action: 'validateVimeo',
+      url: url
+    });
+
+    if (!response.valid) {
+      throw new Error(response.error);
+    }
+
+    // Create Vimeo video celebration
+    const celebration = {
+      id: this.generateId(),
+      type: 'video',
+      data: response.embedUrl,
+      duration: Math.min(response.duration || 10, 30),
+      name: `Vimeo: ${response.title || response.videoId}`,
+      thumbnail: response.thumbnail,
+      isFavorite: false,
+      uploadedAt: Date.now()
+    };
+
+    this.celebrations.push(celebration);
+
+    // Auto-select the newly uploaded media
+    this.settings.selectedMedia = celebration.id;
+
+    await this.saveData();
+    this.renderMediaLibrary();
+
+    document.getElementById('mediaUrl').value = '';
+    this.showToast('Vimeo video added and selected', 'success');
+  }
+
+  
   async selectMedia(id) {
     // Toggle selection if already selected
     if (this.settings.selectedMedia === id) {
@@ -230,8 +310,6 @@ class CodeClimaxPopup {
 
   
   async deleteMedia(id) {
-    if (!confirm('Are you sure you want to delete this celebration?')) return;
-
     const index = this.celebrations.findIndex(c => c.id === id);
     if (index !== -1) {
       this.celebrations.splice(index, 1);
@@ -251,19 +329,6 @@ class CodeClimaxPopup {
     this.celebrations = [];
     this.settings.selectedMedia = null;
 
-    // Keep the default DiCaprio celebration
-    const defaultCelebration = {
-      id: 'default-celebration-dicaprio-damn',
-      type: 'gif',
-      data: 'https://media.tenor.com/16466118.gif',
-      duration: 8,
-      name: 'Leonardo DiCaprio - Damn!',
-      thumbnail: 'https://media.tenor.com/16466118.gif',
-      isFavorite: false,
-      uploadedAt: Date.now()
-    };
-
-    this.celebrations.push(defaultCelebration);
     await this.saveData();
     this.renderMediaLibrary();
     this.showToast('All media cleared successfully', 'success');
