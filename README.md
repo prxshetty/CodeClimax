@@ -1,17 +1,19 @@
 <div align="center">
-  <img src="assets/icon-128.png" alt="CodeClimax Logo" width="80">
-
+  <img src="https://developer.chrome.com/static/docs/webstore/branding/image/UV4C4ybeBTsZt43U4xis.png" alt="Available in the Chrome Web Store" height="58">
+  
   <br />
-
-  <!-- Chrome Web Store Badge -->
-  <a href="https://chromewebstore.google.com/detail/codeclimax/mgedapnihlijlnogdlljajceckbianak?hl=en&authuser=0">
-    <img src="https://developer.chrome.com/static/docs/webstore/branding/image/UV4C4ybeBTsZt43U4xis.png" alt="Available in the Chrome Web Store" height="38">
-  </a>
 </div>
 
-# CodeClimax   
+# CodeClimax    <img src="assets/icon-128.png" alt="CodeClimax Logo" width="25">    
 
 A Chrome extension that celebrates your problem-solving successes with custom media. When you solve a LeetCode problem, the extension detects your success and displays a celebration overlay with your chosen media.
+
+
+
+
+
+  
+![reddit](https://github.com/user-attachments/assets/820b0132-3e2c-45bf-804c-e62839ded73d)
 
 
 <table>
@@ -23,6 +25,7 @@ A Chrome extension that celebrates your problem-solving successes with custom me
       <img src="https://github.com/user-attachments/assets/d0019f57-6466-4b1a-98b1-c303f71d39ca" width="350" />
     </td>
   </tr>
+
 </table>
 
 
