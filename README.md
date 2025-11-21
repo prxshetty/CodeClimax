@@ -1,8 +1,11 @@
 <div align="center">
-  <img src="https://developer.chrome.com/static/docs/webstore/branding/image/UV4C4ybeBTsZt43U4xis.png" alt="Available in the Chrome Web Store" height="58">
-  
+  <a href="https://chromewebstore.google.com/detail/codeclimax/mgedapnihlijlnogdlljajceckbianak?hl=en&authuser=0" target="_blank">
+    <img src="https://developer.chrome.com/static/docs/webstore/branding/image/UV4C4ybeBTsZt43U4xis.png" 
+         alt="Available in the Chrome Web Store" height="58">
+  </a>
   <br />
 </div>
+
 
 # CodeClimax    <img src="assets/icon-128.png" alt="CodeClimax Logo" width="25">    
 
